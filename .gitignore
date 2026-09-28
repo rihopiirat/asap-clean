@@ -47,6 +47,7 @@ next-env.d.ts
 # manual review and eventual commit)
 /test-results/
 /playwright-report/
+/playwright-report-astro/
 /blob-report/
 /playwright/.cache/
 

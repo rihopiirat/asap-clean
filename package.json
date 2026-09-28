@@ -19,7 +19,10 @@
     "astro:dev": "astro dev",
     "astro:build": "astro build",
     "astro:check": "astro check --tsconfig tsconfig.astro.json",
-    "astro:preview": "astro preview"
+    "astro:preview": "astro preview",
+    "test:astro": "npm run astro:build && node --test tests/astro/*.test.mjs",
+    "test:e2e:astro": "playwright test --config=playwright.astro.config.ts",
+    "test:e2e:baseline:astro": "playwright test --config=playwright.baseline.astro.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

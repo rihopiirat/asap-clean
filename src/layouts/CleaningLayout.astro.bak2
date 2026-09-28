@@ -1,0 +1,89 @@
+---
+// Shared presentation layout for all four locales — ported from
+// app/site/CleaningPage.tsx + app/layout.tsx during the Astro migration
+// (Milestone 2). Markup/class names kept identical to the original so the
+// existing hand-authored CSS and the existing Playwright selectors both
+// keep working unchanged. Content comes from ../content/locales.ts, kept
+// separate from this presentation file.
+import "../styles/global.css";
+import { copy, languageLinks, alternateLanguages, type Locale } from "../content/locales";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = copy[locale];
+const areaPlaces = ["Beverwijk", "Heemskerk", "Velsen", "Alkmaar"];
+---
+<!doctype html>
+<html lang={locale}>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>A.S.A.P. Clean | Persoonlijke schoonmaak in Beverwijk</title>
+		<meta name="description" content="Persoonlijke schoonmaak voor huishoudens, kleine bedrijven en vakantieverblijven in Beverwijk en omgeving." />
+		<meta name="robots" content="noindex, nofollow" />
+		<meta name="googlebot" content="noindex, nofollow" />
+		<link rel="shortcut icon" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.svg" />
+		{Object.entries(alternateLanguages).map(([hreflang, href]) => (
+			<link rel="alternate" hreflang={hreflang} href={href} />
+		))}
+	</head>
+	<body>
+		<main>
+			<div class="prototype-bar">{t.prototype}</div>
+			<header class="site-header">
+				<a class="brand" href="#top" aria-label="A.S.A.P. Clean"><span class="brand-mark">A</span><span>A.S.A.P. <b>Clean</b></span></a>
+				<nav class="desktop-nav" aria-label="Primary navigation">
+					<a href="#services">{t.nav[0]}</a><a href="#approach">{t.nav[1]}</a><a href="#area">{t.nav[2]}</a><a href="#review">{t.nav[3]}</a>
+				</nav>
+				<div class="language-switch" aria-label="Language">
+					{languageLinks.map((link) => (
+						<a href={link.href} aria-current={link.label.toLowerCase() === locale ? "page" : undefined}>{link.label}</a>
+					))}
+				</div>
+			</header>
+
+			<section class="hero" id="top">
+				<div class="hero-copy">
+					<p class="eyebrow">{t.eyebrow}</p><h1>{t.title}</h1><p class="hero-intro">{t.intro}</p>
+					<div class="hero-actions"><a class="button primary" href="#contact">{t.cta}</a><a class="button secondary" href="#services">{t.secondary}</a></div>
+					<p class="language-note">{t.note}</p>
+				</div>
+				<div class="hero-image-shell"><img src="/clean-home-demo.webp" alt={t.imageAlt} /><span class="image-label">Temporary demo image</span></div>
+			</section>
+
+			<section class="section services" id="services">
+				<div class="section-heading"><p class="eyebrow">01 · {t.nav[0]}</p><h2>{t.servicesTitle}</h2><p>{t.servicesIntro}</p></div>
+				<div class="service-grid">
+					{t.services.map(([title, body], index) => (
+						<article class="service-card"><span>0{index + 1}</span><h3>{title}</h3><p>{body}</p></article>
+					))}
+				</div>
+			</section>
+
+			<section class="section split" id="approach">
+				<div><p class="eyebrow">02 · {t.nav[1]}</p><h2>{t.approachTitle}</h2><p class="lead">{t.approach}</p></div>
+				<ol class="steps">
+					{t.steps.map((step, index) => (
+						<li><span>{index + 1}</span>{step}</li>
+					))}
+				</ol>
+			</section>
+
+			<section class="section area" id="area">
+				<div><p class="eyebrow">03 · {t.nav[2]}</p><h2>{t.areaTitle}</h2></div><p class="lead">{t.area}</p>
+				<div class="place-row" aria-label="Provisional service locations">
+					{areaPlaces.map((place) => <span>{place}</span>)}
+				</div>
+			</section>
+
+			<section class="section review" id="review"><p class="eyebrow">04 · {t.nav[3]}</p><h2>{t.reviewTitle}</h2><blockquote>“{t.review}”</blockquote><p class="review-by">{t.reviewBy}</p></section>
+
+			<section class="contact" id="contact"><div><p class="eyebrow">05 · {t.nav[4]}</p><h2>{t.contactTitle}</h2><p>{t.contact}</p></div><span class="button disabled" aria-disabled="true">{t.contactButton}</span></section>
+			<footer><span class="brand compact"><span class="brand-mark">A</span><span>A.S.A.P. <b>Clean</b></span></span><p>{t.footer}</p><p>© 2026</p></footer>
+		</main>
+	</body>
+</html>
