@@ -9,7 +9,9 @@ export default defineConfig({
   output: "static",
   outDir: "dist-astro",
   i18n: {
-    locales: ["nl", "en", "it", "ro"],
+    // Simplified launch version: Dutch and English only (Italian and
+    // Romanian dropped per the approved business cards, which are NL/EN).
+    locales: ["nl", "en"],
     defaultLocale: "nl",
     routing: {
       prefixDefaultLocale: false,

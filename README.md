@@ -135,6 +135,39 @@ The timeout defaults can be overridden for a controlled canary with `SITES_INSTA
 
 `npm run build` and `npm test` no longer require GNU `timeout` — `scripts/build-verified.sh` runs the build through `scripts/run-with-timeout.mjs`, a small Node-only equivalent (see its own tests in `tests/run-with-timeout.test.mjs`), so both work on macOS with no global tool installation. `npm run install:ci` is unchanged and still requires Linux `flock`/GNU `timeout` (see Prerequisites) — it wasn't touched, since local development uses `npm ci` instead.
 
+## Astro site (simplified launch version)
+
+A second, static Astro site lives alongside the original Next.js/vinext site during the migration (see "Sites Lifecycle" above — the original stack is untouched and still builds/deploys exactly as before). It's a from-scratch, minimal bilingual (Dutch/English) site sourced directly from the approved A.S.A.P. Clean business cards (`assets-source/*.pdf`, not committed — see `.gitignore`), not a port of the old prototype's placeholder copy.
+
+**Local commands** (temporary `astro:*` naming while both stacks coexist — see the migration plan for the Milestone 3 rename):
+
+```bash
+npm run astro:check   # type-checks .astro files (scoped tsconfig.astro.json)
+npm run astro:build   # builds the static site into dist-astro/
+npm run astro:dev     # dev server
+npm run test:astro    # builds fresh, then asserts on the generated HTML
+npm run test:e2e:astro          # Playwright behavioral suite (tests/e2e-astro/)
+npm run test:e2e:baseline:astro # reference screenshots for manual review only (not pixel-compared)
+```
+
+### Cloudflare Pages deployment settings
+
+The Astro site builds to plain static HTML/CSS/assets — no adapter, no Worker runtime, no bindings, no environment variables required. Cloudflare Pages just needs to serve the output directory.
+
+| Setting | Value |
+|---|---|
+| Framework preset | Astro |
+| Build command | `npm run astro:build` |
+| Build output directory | `dist-astro` |
+| Root directory | `/` (repo root) |
+| Node version | `NODE_VERSION=24.21.0` — matches the runtime this was built and tested against locally |
+| Environment variables | none required |
+| Custom domain | `asapclean.nl` (add once the Pages project exists; if the domain's DNS is already on Cloudflare, this is a one-click "Add custom domain" in the Pages project settings) |
+
+The site currently ships **two** noindex directives on every page (deliberately kept for this review/preview stage — see `src/layouts/CleaningLayout.astro`): `<meta name="robots" content="noindex, nofollow">` and `<meta name="googlebot" content="noindex, nofollow">`. Both must be removed — not just one — as a separate, explicit step whenever the site is ready to actually be indexed; nothing here does that automatically.
+
+Not done as part of this milestone (per instruction): no Cloudflare Pages project was created, nothing was deployed, and no DNS was touched. The table above is what to enter when you're ready to do that yourself.
+
 ## Known gaps / backlog
 
 - **No mobile menu.** Below 920px, `.desktop-nav` is hidden (`app/globals.css`) with nothing replacing it — only the brand and language switcher remain. Tracked as backlog work for after the Astro migration: an accessible toggle button with `aria-expanded` state, full keyboard operability, a closing interaction, and working section links once open.

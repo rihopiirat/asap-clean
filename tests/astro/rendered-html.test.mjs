@@ -10,39 +10,29 @@ import test from "node:test";
 // stale output. Expected strings are hardcoded here (not imported from
 // src/content/locales.ts) so a real regression in the rendered output
 // can't be masked by comparing the site's copy against itself.
+//
+// Simplified launch version: nl/en only, real contact details, no
+// "Lore"/prototype-banner copy.
 
 const distDir = fileURLToPath(new URL("../../dist-astro", import.meta.url));
 
-const expectedTitle = "A.S.A.P. Clean | Persoonlijke schoonmaak in Beverwijk";
-
 const routes = [
-  { file: "index.html", locale: "nl", prototype: "Prototype — diensten, werkgebied en contactgegevens worden nog met Lore bevestigd." },
-  { file: "en/index.html", locale: "en", prototype: "Prototype — services, service area and contact details still need Lore’s confirmation." },
-  { file: "it/index.html", locale: "it", prototype: "Prototipo — servizi, zona e contatti devono ancora essere confermati da Lore." },
-  { file: "ro/index.html", locale: "ro", prototype: "Prototip — serviciile, zona și datele de contact urmează să fie confirmate de Lore." },
+  { file: "index.html", locale: "nl", title: "A.S.A.P. Clean | Professionele schoonmaak" },
+  { file: "en/index.html", locale: "en", title: "A.S.A.P. Clean | Professional cleaning" },
 ];
 
 const expectedAlternates = [
   { hreflang: "nl-NL", href: "/" },
   { hreflang: "en", href: "/en" },
-  { hreflang: "it", href: "/it" },
-  { hreflang: "ro", href: "/ro" },
 ];
 
-for (const { file, locale, prototype } of routes) {
+for (const { file, locale, title } of routes) {
   test(`generated static HTML for ${file} (${locale})`, async () => {
     const html = await readFile(path.join(distDir, file), "utf8");
 
     assert.match(html, new RegExp(`^<!DOCTYPE html><html lang="${locale}"`, "i"));
 
-    assert.ok(
-      html.includes(`<title>${expectedTitle}</title>`),
-      `expected <title>${expectedTitle}</title>`,
-    );
-
-    const prototypeMatch = html.match(/<div class="prototype-bar">([^<]*)<\/div>/);
-    assert.ok(prototypeMatch, "expected a .prototype-bar element");
-    assert.equal(prototypeMatch[1], prototype);
+    assert.ok(html.includes(`<title>${title}</title>`), `expected <title>${title}</title>`);
 
     const robotsMatch = html.match(/<meta name="robots" content="([^"]*)">/);
     assert.ok(robotsMatch, "expected a <meta name=\"robots\"> tag");
@@ -55,5 +45,16 @@ for (const { file, locale, prototype } of routes) {
         `expected hreflang alternate for ${alt.hreflang} -> ${alt.href}`,
       );
     }
+
+    // No "it"/"ro" alternates should remain now that those locales are dropped.
+    assert.doesNotMatch(html, /hreflang="it"/);
+    assert.doesNotMatch(html, /hreflang="ro"/);
+
+    // Real contact details, no personal name, no leftover prototype framing.
+    assert.ok(html.includes("tel:+31630733768"), "expected the tel: call link");
+    assert.ok(html.includes("https://wa.me/31630733768"), "expected the wa.me chat link");
+    assert.ok(html.includes("06 30 73 37 68"), "expected the visible phone number");
+    assert.doesNotMatch(html, /Lore/i, "no personal-name references should remain");
+    assert.doesNotMatch(html, /prototype-bar/i, "the prototype banner should be gone");
   });
 }

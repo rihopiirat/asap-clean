@@ -54,6 +54,11 @@ next-env.d.ts
 # Local IDE settings
 /.idea/
 
+# Source design assets (print-ready business card PDFs) — reference-only,
+# not needed to build the site; the logo actually used is extracted into
+# public/asap-clean-logo.png, which IS committed.
+/assets-source/
+
 # astro (temporary during Next.js/vinext + Astro coexistence — outDir is
 # "dist-astro" instead of "dist" so it can't collide with vinext's build;
 # renamed back to plain "dist" at cutover, see the migration plan)

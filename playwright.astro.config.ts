@@ -1,17 +1,14 @@
 import { defineConfig } from "@playwright/test";
 import { E2E_ASTRO_BASE_URL, E2E_ASTRO_HOST, E2E_ASTRO_PORT, sharedProjects } from "./playwright.shared";
 
-// Runs the SAME spec files as playwright.config.ts (testDir below is the
-// same tests/e2e/ directory) against the Astro static build instead of the
-// original Next.js/vinext site — reusing the existing behavioral
-// assertions rather than duplicating the suite. The one spec that must
-// behave differently per target (tests/e2e/initial-html-lang.spec.ts) reads
-// SITE_TARGET, set here, to know it's running against Astro (where the lang
-// defect is fixed, so no test.fail() markers apply).
-process.env.SITE_TARGET = "astro";
-
+// Dedicated test directory for the Astro site — NOT tests/e2e (the
+// original site's suite). The simplified launch version's content
+// diverged too far from the original's (2 locales instead of 4, no
+// "how it works" section, flat service list instead of cards, real
+// tel:/wa.me contact buttons instead of a disabled placeholder) for
+// literal spec-file reuse to still make sense; see tests/e2e-astro/.
 export default defineConfig({
-  testDir: "./tests/e2e",
+  testDir: "./tests/e2e-astro",
   fullyParallel: true,
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report-astro" }]],
   use: {
