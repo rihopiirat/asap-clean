@@ -52,3 +52,9 @@ next-env.d.ts
 
 # Local IDE settings
 /.idea/
+
+# astro (temporary during Next.js/vinext + Astro coexistence — outDir is
+# "dist-astro" instead of "dist" so it can't collide with vinext's build;
+# renamed back to plain "dist" at cutover, see the migration plan)
+/dist-astro/
+/.astro/
