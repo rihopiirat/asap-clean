@@ -7,7 +7,19 @@ Drizzle support.
 ## Prerequisites
 
 - Node.js `>=22.13.0`
-- Linux with `flock`, `curl`, and GNU `timeout`
+- Linux with `flock`, `curl`, and GNU `timeout` — required only for `npm run install:ci`, the remote Sites builder's own install path. Local development on macOS or Linux doesn't need these; use `npm ci` directly (see "Local Development Setup" below).
+
+## Local Development Setup
+
+For a fresh checkout:
+
+```bash
+npm ci
+npx playwright install chromium
+```
+
+- `npm ci` installs the locked dependencies and is portable (macOS and Linux). Use it for local development rather than `npm run install:ci`, which is a Linux-only wrapper intended for the remote Sites builder (see "Sites Lifecycle" below) and will not run on macOS.
+- `npx playwright install chromium` downloads the Chromium browser binary the Playwright regression suite needs (`npm run test:e2e` / `npm run test:e2e:baseline`). It isn't installed by `npm ci` itself and only needs to be run once per machine.
 
 ## Sites Lifecycle
 
@@ -96,16 +108,38 @@ actions tied to the current ChatGPT user. Leave public content anonymous.
 
 ## Diagnostic Commands
 
-- `npm run install:ci`: perform the one bounded lockfile install
-- `npm run dev`: start the Vite/Vinext development server
+### Routine local verification
+
+Run these as part of normal development — not only to diagnose a remote failure:
+
+- `npm run lint`: ESLint across the project
+- `npm run typecheck`: `tsc --noEmit` across the project
 - `npm run build`: build the deployable Sites artifact
+- `npm test`: build, then run the `node --test` suite in `tests/*.test.mjs`
+- `npm run test:e2e`: run the Playwright regression suite (Chromium, desktop + mobile viewports) against a freshly built production server on `http://localhost:4173`
+
+### Other commands
+
+- `npm run dev`: start the Vite/Vinext development server
 - `npm run start`: start the built Vinext application
-- `npm test`: build and verify the rendered development-preview metadata
+- `npm run install:ci`: the remote Sites builder's own bounded lockfile install — Linux-only (GNU `flock`/`timeout`); use plain `npm ci` for local development instead (see "Local Development Setup")
 - `npm run db:generate`: generate Drizzle migrations after schema changes
 
-Use build commands for targeted diagnosis after a remote failure, not as part of the normal checkpoint path.
+### Baseline screenshots (protected, separate from routine checks)
+
+- `npm run test:e2e:baseline`: captures the 8 reference screenshots (4 locales × 2 viewports) into `tests/e2e-baseline/baseline-images/` for manual review. This is deliberately **not** part of `npm run test:e2e` or a plain `npx playwright test` — it runs from its own Playwright config (`playwright.baseline.config.ts`) against its own test directory (`tests/e2e-baseline/`), so routine verification can never discover or overwrite it. The capture script itself also refuses to overwrite an existing image; run `ALLOW_BASELINE_OVERWRITE=1 npm run test:e2e:baseline` only when you specifically intend to replace the reviewed baseline set.
+
+---
 
 The timeout defaults can be overridden for a controlled canary with `SITES_INSTALL_TIMEOUT`, `SITES_INSTALL_KILL_AFTER`, `SITES_BUILD_TIMEOUT`, and `SITES_BUILD_KILL_AFTER`. A timeout fails the command; the helpers never retry an unchanged install or build.
+
+`npm run build` and `npm test` no longer require GNU `timeout` — `scripts/build-verified.sh` runs the build through `scripts/run-with-timeout.mjs`, a small Node-only equivalent (see its own tests in `tests/run-with-timeout.test.mjs`), so both work on macOS with no global tool installation. `npm run install:ci` is unchanged and still requires Linux `flock`/GNU `timeout` (see Prerequisites) — it wasn't touched, since local development uses `npm ci` instead.
+
+## Known gaps / backlog
+
+- **No mobile menu.** Below 920px, `.desktop-nav` is hidden (`app/globals.css`) with nothing replacing it — only the brand and language switcher remain. Tracked as backlog work for after the Astro migration: an accessible toggle button with `aria-expanded` state, full keyboard operability, a closing interaction, and working section links once open.
+- **Incorrect initial server-rendered `<html lang>`.** `app/layout.tsx` hard-codes `lang="nl"` for every route; the correct locale is only applied client-side via a `useEffect` in `app/site/CleaningPage.tsx`. So `/en`, `/it`, and `/ro` all serve `lang="nl"` in the raw HTML until hydration. Tracked via the three `test.fail()` cases in `tests/e2e/initial-html-lang.spec.ts` — remove the marker for a locale once its route renders the correct `lang` server-side (the Astro migration is the natural point to fix this properly, since each route can own its own server-rendered `<html>`).
+- **Unsupported scrollbar utility classes in the (unused) shadcn component catalog.** `components/ui/message-scroller.tsx` and `components/ui/attachment.tsx` use the class names `scrollbar-thin`, `scrollbar-none`, and `scrollbar-gutter-stable`, but none of the three has a matching utility definition anywhere in this project's Tailwind setup: core `tailwindcss` defines none, `tw-animate-css` defines none, and the vendored `vendor/shadcn-tailwind-4.13.0.css` defines only a differently-named `no-scrollbar` utility (itself unused anywhere in scanned source). So none of the three currently produce any CSS. Neither component is imported by the live site, so this has no visitor-facing effect today. Fixing it (if these components are ever wired up) would mean either adding a scrollbar-styling Tailwind plugin — the class names resemble the convention used by such plugins, though none has been verified to supply exactly these three — or hand-authoring matching `@utility` definitions in the vendor catalog. `tests/ui-components.test.mjs` documents this gap with a comment rather than asserting on it.
 
 ## Learn More
 

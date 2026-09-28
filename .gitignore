@@ -35,8 +35,20 @@ yarn-error.log*
 
 # typescript
 next-env.d.ts
+*.tsbuildinfo
 /dist/
 /.wrangler/
 /.sites-runtime/
 /outputs/
 /work/
+
+# playwright (reports/traces are ephemeral; baseline images under
+# tests/e2e-baseline/baseline-images/ are NOT ignored — they're prepared for
+# manual review and eventual commit)
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# Local IDE settings
+/.idea/
