@@ -108,7 +108,19 @@ export const languageLinks: ReadonlyArray<{ label: string; href: string }> = [
   { label: "EN", href: "/en" },
 ];
 
-export const alternateLanguages: Record<string, string> = {
-  "nl-NL": "/",
+// Production domain — used for canonical links, hreflang alternates,
+// robots.txt's sitemap reference, and sitemap.xml itself. Always the real
+// production URL, regardless of which environment actually built the
+// site: a canonical/hreflang link is supposed to point at the intended
+// production address even from a preview deployment.
+export const siteUrl = "https://asapclean.nl";
+
+export const localePaths: Record<Locale, string> = {
+  nl: "/",
   en: "/en",
+};
+
+export const alternateLanguages: Record<string, string> = {
+  "nl-NL": `${siteUrl}/`,
+  en: `${siteUrl}/en`,
 };

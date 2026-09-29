@@ -4,7 +4,7 @@
 // placeholder contact copy: services, service area and contact links are
 // final, from the cards.
 import "../styles/global.css";
-import { copy, languageLinks, alternateLanguages, business, type Locale } from "../content/locales";
+import { copy, languageLinks, alternateLanguages, business, siteUrl, localePaths, type Locale } from "../content/locales";
 
 interface Props {
   locale: Locale;
@@ -13,6 +13,16 @@ interface Props {
 const { locale } = Astro.props;
 const t = copy[locale];
 const metaTitle = `${business.name} | ${t.eyebrow}`;
+
+// Production indexing is opt-in via ALLOW_INDEXING=true, set only in
+// Cloudflare Pages' PRODUCTION environment variables (not Preview) — see
+// README. Every other build (local dev/test, Cloudflare Pages preview
+// deployments, anything that doesn't explicitly set it) stays noindex by
+// default, which is the safe default and keeps the old prototype/any
+// preview deployment out of search results.
+const allowIndexing = import.meta.env.ALLOW_INDEXING === "true";
+const robotsContent = allowIndexing ? "index, follow" : "noindex, nofollow";
+const canonicalUrl = `${siteUrl}${localePaths[locale]}`;
 ---
 <!doctype html>
 <html lang={locale}>
@@ -21,8 +31,9 @@ const metaTitle = `${business.name} | ${t.eyebrow}`;
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>{metaTitle}</title>
 		<meta name="description" content={t.intro} />
-		<meta name="robots" content="noindex, nofollow" />
-		<meta name="googlebot" content="noindex, nofollow" />
+		<meta name="robots" content={robotsContent} />
+		<meta name="googlebot" content={robotsContent} />
+		<link rel="canonical" href={canonicalUrl} />
 		<link rel="shortcut icon" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.svg" />
 		{Object.entries(alternateLanguages).map(([hreflang, href]) => (
