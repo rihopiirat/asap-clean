@@ -20,7 +20,8 @@
     "astro:build": "astro build",
     "astro:check": "astro check --tsconfig tsconfig.astro.json",
     "astro:preview": "astro preview",
-    "test:astro": "npm run astro:build && node --test tests/astro/*.test.mjs",
+    "test:astro": "ALLOW_INDEXING=false npm run astro:build && node --test tests/astro/*.test.mjs",
+    "test:astro:production": "ALLOW_INDEXING=true npm run astro:build && node --test tests/astro/production/*.test.mjs",
     "test:e2e:astro": "playwright test --config=playwright.astro.config.ts",
     "test:e2e:baseline:astro": "playwright test --config=playwright.baseline.astro.config.ts"
   },

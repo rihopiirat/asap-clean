@@ -8,6 +8,15 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   output: "static",
   outDir: "dist-astro",
+  // Not the default "./src": vinext/Next.js also recognizes a src/pages/
+  // directory as its own legacy Pages Router convention, regardless of
+  // where its own app/ router lives. While robots.txt.ts and sitemap.xml.ts
+  // (now at astro-src/pages/) briefly lived at src/pages/, vinext started
+  // building them as routes into the ORIGINAL site's production build —
+  // real cross-stack interference, caught by the routine "does the
+  // original build stay clean" check. A source directory name Next.js
+  // doesn't recognize avoids it entirely.
+  srcDir: "./astro-src",
   i18n: {
     // Simplified launch version: Dutch and English only (Italian and
     // Romanian dropped per the approved business cards, which are NL/EN).

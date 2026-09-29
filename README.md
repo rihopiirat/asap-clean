@@ -145,7 +145,8 @@ A second, static Astro site lives alongside the original Next.js/vinext site dur
 npm run astro:check   # type-checks .astro files (scoped tsconfig.astro.json)
 npm run astro:build   # builds the static site into dist-astro/
 npm run astro:dev     # dev server
-npm run test:astro    # builds fresh, then asserts on the generated HTML
+npm run test:astro    # builds fresh (ALLOW_INDEXING=false), asserts the default/preview-safe output
+npm run test:astro:production   # builds fresh with ALLOW_INDEXING=true, asserts the production-indexable output
 npm run test:e2e:astro          # Playwright behavioral suite (tests/e2e-astro/)
 npm run test:e2e:baseline:astro # reference screenshots for manual review only (not pixel-compared)
 ```
@@ -161,10 +162,15 @@ The Astro site builds to plain static HTML/CSS/assets — no adapter, no Worker 
 | Build output directory | `dist-astro` |
 | Root directory | `/` (repo root) |
 | Node version | `NODE_VERSION=24.21.0` — matches the runtime this was built and tested against locally |
-| Environment variables | none required |
+| Environment variables | `ALLOW_INDEXING` — see below |
 | Custom domain | `asapclean.nl` (add once the Pages project exists; if the domain's DNS is already on Cloudflare, this is a one-click "Add custom domain" in the Pages project settings) |
 
-The site currently ships **two** noindex directives on every page (deliberately kept for this review/preview stage — see `src/layouts/CleaningLayout.astro`): `<meta name="robots" content="noindex, nofollow">` and `<meta name="googlebot" content="noindex, nofollow">`. Both must be removed — not just one — as a separate, explicit step whenever the site is ready to actually be indexed; nothing here does that automatically.
+**Indexing** is controlled entirely by the `ALLOW_INDEXING` build-time environment variable (read in `astro-src/layouts/CleaningLayout.astro` and the `astro-src/pages/robots.txt.ts` / `sitemap.xml.ts` endpoints):
+
+- **Unset (the default)** — every page ships `<meta name="robots" content="noindex, nofollow">` and `<meta name="googlebot" content="noindex, nofollow">`; `robots.txt` allows crawling (so search engines can actually fetch a page and see those noindex tags — that's the real de-indexing signal) but does **not** advertise the sitemap. This is what local builds, `npm test`, and any Cloudflare Pages deployment that doesn't explicitly opt in will produce — including Preview deployments, which must never be indexed.
+- **`ALLOW_INDEXING=true`** — both meta tags switch to `index, follow`, and `robots.txt` additionally references `https://asapclean.nl/sitemap.xml`.
+
+**Set `ALLOW_INDEXING=true` only in the Cloudflare Pages project's Production environment variables — leave it unset for Preview.** Cloudflare Pages lets you configure environment variables separately per Production/Preview environment in the project's Settings → Environment variables; this is a build-time value baked into the static output, so it is **not** retroactive — changing it (or setting it for the first time) only takes effect on the *next* deployment triggered after the change, not on deployments already built.
 
 Not done as part of this milestone (per instruction): no Cloudflare Pages project was created, nothing was deployed, and no DNS was touched. The table above is what to enter when you're ready to do that yourself.
 
