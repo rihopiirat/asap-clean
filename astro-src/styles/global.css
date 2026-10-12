@@ -10,6 +10,7 @@
   --navy: #0a1631;
   --pink-tint: #f8e4eb;
   --white: #ffffff;
+  --raspberry: #b00849;
   --muted: #5b6472;
   --line: #e7e1e5;
 }
@@ -99,8 +100,8 @@ h2 { overflow-wrap: break-word; margin-bottom: 1.2rem; font-size: clamp(1.8rem, 
   margin: 0 auto clamp(3rem, 6vw, 5rem);
   padding: clamp(2.5rem, 6vw, 4rem);
   border-radius: 28px;
-  background: var(--navy);
-  color: var(--white);
+  background: var(--pink-tint);
+  color: var(--navy);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -108,9 +109,12 @@ h2 { overflow-wrap: break-word; margin-bottom: 1.2rem; font-size: clamp(1.8rem, 
   gap: 2rem;
 }
 .contact-copy { max-width: 520px; min-width: 0; overflow-wrap: anywhere; }
-.contact-copy h2 { color: var(--white); }
-.contact-copy p { color: #c7cbd6; }
-.phone-number { margin-top: 1rem; font-size: 1.6rem; font-weight: 700; color: var(--white); }
+.contact-copy h2 { color: var(--navy); }
+.contact-copy p { color: var(--navy); }
+/* Two classes so it beats .contact-copy p (the paragraph colour above). */
+.contact-copy .phone-number { margin-top: 1rem; display: flex; flex-wrap: wrap; align-items: center; gap: .25rem .5rem; font-size: 1.6rem; font-weight: 700; color: var(--raspberry); }
+.phone-icon { flex: none; width: 1em; height: 1em; }
+.contact a:focus-visible { outline: 3px solid var(--navy); outline-offset: 3px; }
 .contact-actions { display: flex; flex-wrap: wrap; gap: .8rem; min-width: 0; }
 .contact-actions .button { max-width: 100%; text-align: center; overflow-wrap: anywhere; }
 
@@ -132,6 +136,7 @@ footer {
   .desktop-nav { display: none; }
   .contact { flex-direction: column; align-items: stretch; text-align: center; }
   .contact-copy { max-width: none; }
+  .contact-copy .phone-number { justify-content: center; }
   .contact-actions { justify-content: center; }
 }
 @media (max-width: 600px) {

@@ -171,7 +171,15 @@ for (const [locale, c] of Object.entries(content)) {
 
     assert.ok(contact.includes(`<p>${c.contact}</p>`), "expected the new contact-request paragraph");
     assert.ok(!html.includes(c.removedContact), "the old contact intro line should be gone");
-    assert.ok(contact.includes('<p class="phone-number">06 30 73 37 68</p>'));
+    const phone = contact.match(/<p class="phone-number">(.*?)<\/p>/s);
+    assert.ok(phone, "expected the phone number paragraph");
+    assert.equal(phone[1].replace(/<svg[\s\S]*?<\/svg>/, "").replace(/<[^>]+>/g, "").trim(), "06 30 73 37 68");
+    const icon = phone[1].match(/<svg[^>]*>/);
+    assert.ok(icon, "expected an inline phone icon before the number");
+    assert.ok(phone[1].indexOf("<svg") < phone[1].indexOf("06 30"), "icon comes before the number");
+    assert.match(icon[0], /stroke="currentColor"/);
+    assert.match(icon[0], /aria-hidden="true"/);
+    assert.match(icon[0], /focusable="false"/);
     assert.ok(contact.includes('href="tel:+31630733768"'));
     assert.ok(contact.includes('href="https://wa.me/31630733768"'));
   });

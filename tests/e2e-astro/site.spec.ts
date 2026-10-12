@@ -51,6 +51,52 @@ for (const { path, locale, title } of routes) {
       expect(chatText).not.toMatch(/\bbel\b/); // Dutch for "call"
     });
 
+    test("contact colours: pale pink block, navy copy, raspberry number with a phone icon", async ({ page }) => {
+      await page.goto(path);
+      const colours = await page.evaluate(() => {
+        const c = (sel: string, prop = "color") => getComputedStyle(document.querySelector(sel)!).getPropertyValue(prop);
+        return {
+          background: c(".contact", "background-color"),
+          heading: c(".contact-copy h2"),
+          paragraph: c(".contact-copy p:not(.phone-number)"),
+          number: c(".phone-number"),
+          iconStroke: c(".phone-number svg", "stroke"),
+          numberText: c(".phone-number span"),
+        };
+      });
+      expect(colours.background).toBe("rgb(248, 228, 235)");
+      expect(colours.heading).toBe("rgb(10, 22, 49)");
+      expect(colours.paragraph).toBe("rgb(10, 22, 49)");
+      expect(colours.number).toBe("rgb(176, 8, 73)");
+      expect(colours.numberText).toBe("rgb(176, 8, 73)");
+      expect(colours.iconStroke).toBe("rgb(176, 8, 73)");
+
+      const icon = page.locator(".phone-number svg");
+      await expect(icon).toBeVisible();
+      await expect(icon).toHaveAttribute("aria-hidden", "true");
+      await expect(icon).toHaveAttribute("focusable", "false");
+      const [iconBox, textBox] = await Promise.all([icon.boundingBox(), page.locator(".phone-number span").boundingBox()]);
+      expect(iconBox!.x + iconBox!.width, "icon sits immediately before the number").toBeLessThanOrEqual(textBox!.x);
+      expect(textBox!.x - (iconBox!.x + iconBox!.width), "icon and number are not glued together or far apart").toBeLessThan(24);
+    });
+
+    test("contact buttons keep their colours and show a visible keyboard focus ring", async ({ page }) => {
+      await page.goto(path);
+      const call = page.locator(".contact-actions a.primary");
+      const chat = page.locator(".contact-actions a.whatsapp");
+      await expect(call).toHaveCSS("background-color", "rgb(209, 10, 86)");
+      await expect(chat).toHaveCSS("background-color", "rgb(37, 211, 102)");
+      await expect(chat).toHaveCSS("color", "rgb(10, 22, 49)");
+
+      await call.focus();
+      await page.keyboard.press("Shift+Tab");
+      await page.keyboard.press("Tab");
+      await expect(call).toBeFocused();
+      await expect(call).toHaveCSS("outline-style", "solid");
+      await expect(call).toHaveCSS("outline-width", "3px");
+      await expect(call).toHaveCSS("outline-color", "rgb(10, 22, 49)");
+    });
+
     test("no console errors, page errors, failed requests, or HTTP error responses", async ({ page, baseURL }) => {
       const consoleErrors: string[] = [];
       const pageErrors: string[] = [];

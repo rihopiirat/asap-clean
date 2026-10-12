@@ -95,7 +95,7 @@ const canonicalUrl = `${siteUrl}${localePaths[locale]}`;
 				<div class="contact-copy">
 					<h2>{t.contactTitle}</h2>
 					<p>{t.contact}</p>
-					<p class="phone-number">{business.phoneDisplay}</p>
+					<p class="phone-number"><svg class="phone-icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6.5" y="2" width="11" height="20" rx="2.5" /><path d="M11 18.5h2" /></svg><span>{business.phoneDisplay}</span></p>
 				</div>
 				<div class="contact-actions">
 					<a class="button primary" href={business.telHref}>{t.callLabel}</a>
