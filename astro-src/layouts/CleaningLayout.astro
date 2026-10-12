@@ -2,7 +2,7 @@
 // Simplified launch version — sourced from the approved A.S.A.P. Clean
 // business cards. No hero photo, no multi-step "how it works" section, no
 // placeholder contact copy: services, service area and contact links are
-// final, from the cards.
+// final (owner-approved copy; see astro-src/content/locales.ts).
 import "../styles/global.css";
 import { copy, languageLinks, alternateLanguages, business, siteUrl, localePaths, type Locale } from "../content/locales";
 
@@ -69,8 +69,15 @@ const canonicalUrl = `${siteUrl}${localePaths[locale]}`;
 			<section class="section services" id="services">
 				<h2>{t.servicesTitle}</h2>
 				<ul class="service-list">
-					{t.services.map((service) => <li>{service}</li>)}
+					{t.services.map((service) => (
+						<li class="service-card">
+							<h3>{service.title}</h3>
+							<p>{service.description}</p>
+						</li>
+					))}
 				</ul>
+				<p class="services-note">{t.servicesFrequency}</p>
+				<p class="services-prep">{t.servicesPreparation}</p>
 			</section>
 
 			<section class="section area" id="area">
